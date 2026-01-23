@@ -1,6 +1,9 @@
 package com.openclassrooms.tourguide.service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.stereotype.Service;
 
@@ -77,4 +80,15 @@ public class RewardsService {
         return statuteMiles;
 	}
 
+	private final ExecutorService executorService = Executors.newFixedThreadPool(1000);
+
+	public CompletableFuture<Void> calculateRewardsAsync(User user) {
+		return CompletableFuture.runAsync(() -> {
+			calculateRewards(user);
+		}, executorService);
+	}
+
+	public void shutDown() {
+		executorService.shutdown();
+	}
 }
