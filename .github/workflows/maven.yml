@@ -1,4 +1,4 @@
-name: Java CI with Maven
+name: TourGuide CI
 
 on:
   push:
@@ -9,6 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: TourGuide
 
     steps:
     - uses: actions/checkout@v4
@@ -18,7 +22,8 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: maven
+        cache: 'maven'
+        cache-dependency-path: 'TourGuide/pom.xml'
 
     - name: Install Local Dependencies
       run: |
@@ -26,12 +31,12 @@ jobs:
         mvn install:install-file -Dfile=libs/RewardCentral.jar -DgroupId=rewardCentral -DartifactId=rewardCentral -Dversion=1.0.0 -Dpackaging=jar
         mvn install:install-file -Dfile=libs/TripPricer.jar -DgroupId=tripPricer -DartifactId=tripPricer -Dversion=1.0.0 -Dpackaging=jar
 
-    - name: Build with Maven
-      run: mvn -B package -Dtest=!TestPerformance --file pom.xml
-
+    - name: Build and Test (Skip Performance)
+      run: mvn clean verify -Dtest=!TestPerformance
+      
     - name: Upload Build Artifact
       uses: actions/upload-artifact@v4
       if: success()
       with:
         name: tourguide-jar
-        path: target/*.jar
+        path: TourGuide/target/*.jar
